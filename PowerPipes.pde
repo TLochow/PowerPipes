@@ -10,6 +10,7 @@ IGameModule _currentModule;
 
 void setup() {
   size(450, 800);
+  //fullScreen();
 
   FASTCLICK = new SoundFile(this, "fast-click.wav");
   MISSILE = new SoundFile(this, "missile.wav");

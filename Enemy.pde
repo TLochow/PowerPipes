@@ -1,5 +1,6 @@
 class Enemy {
   public float Health;
+  public int StartHealth;
 
   int _counterUntilShooting;
   int _shootingSpeed;
@@ -14,6 +15,7 @@ class Enemy {
 
   public Enemy(float health, int shootingSpeed, float baseDamage, float shieldOnlyDamage, float shieldBustingDamage) {
     Health = health;
+    StartHealth = round(health);
     _shootingSpeed = shootingSpeed;
     _counterUntilShooting = 1000 - (shootingSpeed * 10);
     _baseDamage = baseDamage;

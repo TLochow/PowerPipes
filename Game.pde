@@ -36,6 +36,8 @@ class Game extends IGameModule {
 
   ArrayList<IParticle> _particles;
 
+  ArrayList<Scrap> _scrap;
+
   public Game(int fieldSize) {
     _fieldSize = fieldSize;
     _fieldYPosition = 160 * SCALE;
@@ -77,10 +79,14 @@ class Game extends IGameModule {
     _playerBullets = new ArrayList<Bullet>();
     _enemyBullets = new ArrayList<Bullet>();
     _particles = new ArrayList<IParticle>();
+    _scrap = new ArrayList<Scrap>();
 
     _decimalFormat = new DecimalFormat();
     _decimalFormat.setGroupingUsed(true);
     _decimalFormat.setGroupingSize(3);
+    
+    
+        SpawnScrap(100);
   }
 
   public IGameModule Update() {
@@ -175,6 +181,14 @@ class Game extends IGameModule {
       }
     }
 
+    for (int i = _scrap.size() - 1; i >= 0; i--) {
+      Scrap scrap = _scrap.get(i);
+      if (scrap.Update(-175 * SCALE, -135 * SCALE)) {
+        _player.Scrap += scrap.Value;
+        _scrap.remove(i);
+      }
+    }
+
     for (int i = _playerBullets.size() - 1; i >= 0; i--) {
       Bullet currentBullet = _playerBullets.get(i);
       if (currentBullet.Update()) {
@@ -182,6 +196,7 @@ class Game extends IGameModule {
           _currentEnemy.Health -= currentBullet.BaseDamage;
         }
         _playerBullets.remove(i);
+        SpawnScrap(floor(random(1, 6)));
       }
     }
     for (int i = _enemyBullets.size() - 1; i >= 0; i--) {
@@ -212,8 +227,10 @@ class Game extends IGameModule {
         _currentEnemy = _enemyGenerator.GenerateEnemy();
       }
     } else {
-      if (_currentEnemy.Health <= 0)
+      if (_currentEnemy.Health <= 0) {
+        SpawnScrap(_currentEnemy.StartHealth);
         _currentEnemy = null;
+      }
       else {
         Bullet shot = _currentEnemy.Update();
         if (shot != null)
@@ -270,7 +287,7 @@ class Game extends IGameModule {
     textSize(30 * SCALE);
     fill(0);
     text("UPGRADES", 55 * SCALE, -325 * SCALE);
-    
+
     fill(255);
     textSize(15 * SCALE);
     text("S", -170 * SCALE, -352 * SCALE);
@@ -300,6 +317,8 @@ class Game extends IGameModule {
       currentBullet.Draw(-135 * SCALE, false);
     for (Bullet currentBullet : _enemyBullets)
       currentBullet.Draw(-135 * SCALE, true);
+    for (Scrap currentScrap : _scrap)
+      currentScrap.Draw();
 
     // Draw Ship:
     fill(150);
@@ -431,6 +450,32 @@ class Game extends IGameModule {
 
   private String AddSeperatorsToNumber(int number) {
     return _decimalFormat.format(number);
+  }
+
+  private void SpawnScrap(int value) {
+    int currentType = 1;
+    int current = 1;
+    while (current < value)
+      current *= 10;
+
+    while (value > 0) {
+      while (value >= current) {
+        _scrap.add(new Scrap(175 * SCALE, -135 * SCALE, current));
+        value -= current;
+      }
+      if (currentType == 1) {
+        current *= 5;
+        current /= 10;
+        currentType = 5;
+      } else if (currentType == 2) {
+        current /= 2;
+        currentType = 1;
+      } else if (currentType == 5) {
+        current /= 5;
+        current *= 2;
+        currentType = 2;
+      }
+    }
   }
 
   private void DrawSymbols(float xOffset, float cellSize) {
